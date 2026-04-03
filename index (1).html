@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setting Up Claude Code on Windows — Aceable</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f4; --bg-info: #eff6ff; --bg-warn: #fffbeb; --bg-ok: #f0fdf4;
+    --text: #1c1917; --text2: #57534e; --text3: #a8a29e;
+    --text-info: #1d4ed8; --text-warn: #92400e; --text-ok: #166534;
+    --border: #e7e5e4; --border2: #d6d3d1;
+    --blue: #185FA5; --blue-dk: #0C447C; --green: #1D9E75; --amber: #BA7517;
+    --mono: 'Courier New', monospace; --r: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1917; --bg2: #292524; --bg-info: #1e3a5f; --bg-warn: #3d2500; --bg-ok: #0f2d1c;
+      --text: #fafaf9; --text2: #d6d3d1; --text3: #78716c;
+      --text-info: #93c5fd; --text-warn: #fcd34d; --text-ok: #86efac;
+      --border: #3c3836; --border2: #57534e; --blue: #378ADD; --blue-dk: #185FA5;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  header { background: var(--blue); color: #fff; padding: 1.1rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+  header .logo { font-size: 17px; font-weight: 700; }
+  header .sub { font-size: 12px; opacity: .7; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+  .prog { display: flex; gap: 3px; margin-bottom: 5px; }
+  .seg { flex: 1; height: 4px; border-radius: 2px; background: var(--border); transition: background .3s; }
+  .seg.done { background: var(--green); } .seg.active { background: var(--blue); }
+  .prog-lbl { font-size: 12px; color: var(--text3); text-align: right; margin-bottom: 1.75rem; }
+  .phase { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text3); text-transform: uppercase; margin-bottom: .35rem; }
+  .stitle { font-size: 21px; font-weight: 700; color: var(--text); margin-bottom: .7rem; line-height: 1.3; }
+  .body { font-size: 14.5px; color: var(--text2); line-height: 1.7; margin-bottom: 1rem; }
+  .callout { padding: .75rem 1rem; margin-bottom: .8rem; font-size: 13.5px; line-height: 1.6; border-left: 3px solid; border-radius: 0 var(--r) var(--r) 0; }
+  .callout strong { font-weight: 600; }
+  .tip { background: var(--bg-info); color: var(--text-info); border-color: var(--blue); }
+  .warn { background: var(--bg-warn); color: var(--text-warn); border-color: var(--amber); }
+  .ok { background: var(--bg-ok); color: var(--text-ok); border-color: var(--green); }
+  .bigbox { border-radius: var(--r); padding: 1rem 1.1rem; margin-bottom: .85rem; font-size: 14.5px; line-height: 1.7; font-weight: 500; }
+  .bigbox strong { font-weight: 700; }
+  .bigbox.warn { border: 2px solid var(--amber); background: var(--bg-warn); color: var(--text-warn); }
+  .bigbox.ok { border: 2px solid var(--green); background: var(--bg-ok); color: var(--text-ok); }
+  .helpbox { border: 2px solid var(--green); border-radius: var(--r); padding: 1rem 1.1rem; margin-top: 1.25rem; margin-bottom: .5rem; background: var(--bg-ok); color: var(--text-ok); font-size: 13.5px; line-height: 1.7; }
+  .helpbox strong { font-weight: 700; display: block; margin-bottom: .25rem; font-size: 14px; }
+  .helpbox ol { list-style: none; counter-reset: h; padding: 0; margin: 0; }
+  .helpbox ol li { counter-increment: h; display: flex; gap: 8px; margin-bottom: .3rem; }
+  .helpbox ol li::before { content: counter(h) "."; font-weight: 700; flex-shrink: 0; }
+  ol.steps { list-style: none; counter-reset: s; margin-bottom: 1rem; }
+  ol.steps li { counter-increment: s; display: flex; gap: 12px; align-items: flex-start; margin-bottom: .6rem; font-size: 14px; color: var(--text2); line-height: 1.65; }
+  ol.steps li::before { content: counter(s); min-width: 23px; height: 23px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--text); flex-shrink: 0; margin-top: 1px; }
+  .cb { font-family: var(--mono); font-size: 13px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); padding: .65rem 1rem; margin-bottom: .8rem; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 8px; word-break: break-all; }
+  .cpbtn { font-size: 11px; font-weight: 600; color: var(--text3); border: 1px solid var(--border2); background: transparent; border-radius: 5px; padding: 3px 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit; transition: all .15s; }
+  .cpbtn:hover { background: var(--bg); color: var(--text); }
+  .cpbtn.copied { color: var(--text-ok); border-color: var(--green); }
+  .fork { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .fcard { border: 1.5px solid var(--border2); border-radius: var(--r); padding: 1.1rem; cursor: pointer; transition: border-color .2s, background .2s; text-align: center; }
+  .fcard:hover { border-color: var(--blue); background: var(--bg-info); }
+  .fcard.sel { border-color: var(--blue); background: var(--bg-info); }
+  .ficon { font-size: 30px; margin-bottom: .5rem; }
+  .flbl { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
+  .fsub { font-size: 12px; color: var(--text3); line-height: 1.45; }
+  .kbrow { display: flex; justify-content: space-between; font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; color: var(--text2); }
+  .kbrow:last-child { border-bottom: none; }
+  .kbd { font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border2); padding: 2px 8px; border-radius: 4px; font-size: 11.5px; color: var(--text); white-space: nowrap; }
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+  .nav { display: flex; gap: 8px; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--border); align-items: center; }
+  .bbk { background: transparent; border: 1px solid var(--border2); color: var(--text2); padding: 10px 20px; border-radius: var(--r); font-size: 14px; cursor: pointer; font-family: inherit; transition: background .15s; }
+  .bbk:hover { background: var(--bg2); }
+  .bnx { background: var(--blue); color: #fff; border: none; padding: 10px 24px; border-radius: var(--r); font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-left: auto; transition: background .15s; }
+  .bnx:hover { background: var(--blue-dk); }
+  .bnx:disabled { opacity: .4; cursor: default; }
+  .done-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-ok); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; color: var(--text-ok); }
+  .cl { text-align: left; background: var(--bg2); border-radius: var(--r); padding: .9rem 1.1rem; margin-bottom: 1.25rem; }
+  .ci { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
+  .ci:last-child { border-bottom: none; }
+  .ci .ck { color: var(--green); flex-shrink: 0; font-size: 16px; margin-top: 1px; }
+  .lbtn { display: inline-block; background: var(--blue); color: #fff; padding: 11px 22px; border-radius: var(--r); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; font-family: inherit; transition: background .15s; }
+  .lbtn:hover { background: var(--blue-dk); }
+  code { font-family: var(--mono); font-size: 12.5px; background: var(--bg2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--text); }
+  @media (max-width: 500px) { .fork { grid-template-columns: 1fr; } .stitle { font-size: 18px; } header .sub { display: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Aceable · Claude Code Setup</div>
+  <div class="sub">Windows PC Guide</div>
+</header>
+<div class="wrap">
+  <div class="prog" id="prog"></div>
+  <div class="prog-lbl" id="plbl"></div>
+  <div id="main"></div>
+</div>
+<script>
+let cur=0, path=null;
+
+const HELP = `<div class="helpbox"><strong>🟢 Stuck on this step?</strong><ol><li>Try asking <strong>Claude (claude.ai)</strong> directly — describe what happened and paste any error message.</li><li>Still stuck? Take a <strong>screenshot and upload it to Claude</strong> — it can see exactly what you're seeing.</li><li>If that still doesn't resolve it, post in <strong>#guild-ai</strong> on Slack. Someone will help.</li></ol></div>`;
+
+const ALL=[
+{phase:"Welcome",title:"Let's get you set up with Claude Code on Windows",content:`
+<div class="body">This guide walks you through everything — from requesting access all the way to your first conversation with Claude. No tech experience needed. Just follow one step at a time and don't skip ahead.</div>
+<div class="callout tip"><strong>What is Claude Code?</strong> An AI assistant that lives inside your text editor. It can read your files, help write and review work, and answer questions about Aceable's products. Think of it as a very smart teammate that never sleeps.</div>
+<div class="callout warn"><strong>Windows PCs only.</strong> This guide is written specifically for Windows. Mac users should follow the Mac setup guide instead.</div>
+`},
+{phase:"Getting access",title:"Step 1 — Request access from IT via Slack",content:`
+<div class="body">Before you can use Claude Code, IT needs to provision your account. This takes 2 minutes to submit and usually comes back same-day.</div>
+<ol class="steps">
+<li>Open Slack. In the message box at the bottom of any channel, type <strong>/assist</strong> and press Enter. Slack will leave it in the field unsent — just press Enter once more to open the IT request form.</li>
+<li>When the form appears, choose <strong>IT ticket</strong>.</li>
+<li>In the Summary field write: <em>Get set up on Claude Code</em></li>
+<li>Skip the description and click <strong>Submit</strong>.</li>
+</ol>
+<div class="callout tip"><strong>Who handles these?</strong> Usually Eric. If you haven't heard back after a day, ping him directly in Slack.</div>
+<div class="callout ok"><strong>What you'll receive from IT:</strong> An invitation to join the Aceable GitHub organization + access to Claude.ai with your work email. You'll need both before you can finish this guide — so submit the ticket now even if you're planning to continue later.</div>
+`},
+{phase:"Getting access",title:"Step 2 — Create your GitHub account",content:`
+<div class="body">GitHub is where Aceable's code lives in the cloud. You need an account so IT can give you access to the right projects.</div>
+<ol class="steps">
+<li>Go to <strong>github.com</strong> in your browser and click <strong>Sign up</strong>.</li>
+<li>Enter your <strong>Aceable email address</strong>.</li>
+<li>Create a password.</li>
+<li>For your username, use this exact format — IT uses it to find you:</li>
+</ol>
+<div class="cb"><span>ace-firstname-lastinitial &nbsp;→&nbsp; e.g. ace-jane-s</span></div>
+<div class="callout warn"><strong>Username format matters.</strong> If you use anything different, IT can't add you to the right repos. Stick to ace-firstname-lastinitial exactly.</div>
+<ol class="steps" style="counter-reset:s 4">
+<li>Complete the verification puzzle, then check your email for a code from GitHub and enter it.</li>
+<li>GitHub may ask personalization questions — scroll down and click <strong>Skip personalization</strong>.</li>
+</ol>
+<div class="callout ok"><strong>Done when:</strong> You can log in to github.com and see your dashboard.</div>
+`},
+{phase:"Installing tools",title:"Step 3 — Install Git for Windows",content:`
+<div class="body">Git for Windows is a behind-the-scenes tool that Claude Code needs to work on a PC. It won't open on its own or get in your way — it just needs to be installed. Takes about 3 minutes.</div>
+<ol class="steps">
+<li>Open your browser and go to <strong>git-scm.com/download/win</strong> — the download starts automatically.</li>
+<li>Find the downloaded file. To get to your Downloads folder: open <strong>File Explorer</strong> (the yellow folder icon in your taskbar, or press <strong>Windows key + E</strong>), then click <strong>Downloads</strong> on the left side.</li>
+<li>Double-click the file to run it. It'll be named something like <em>Git-2.x.x-64-bit.exe</em></li>
+<li>The installer shows several screens. Click <strong>Next</strong> through all of them — all default settings are correct, don't change anything.</li>
+<li>Click <strong>Install</strong> and wait for it to finish.</li>
+<li>Click <strong>Finish</strong>.</li>
+</ol>
+<div class="callout tip"><strong>Don't restart your computer yet</strong> — wait until after the next step.</div>
+`},
+{phase:"Installing tools",title:"Step 4 — Install Claude Code",content:`
+<div class="body">Now we install Claude Code itself. We'll use PowerShell — a built-in Windows tool that lets you run commands. You only need to paste one line.</div>
+<ol class="steps">
+<li>Click the <strong>Start menu</strong> (Windows icon in the bottom-left of your screen) and type <strong>PowerShell</strong>.</li>
+<li>Click <strong>Windows PowerShell</strong> to open it. A blue or dark window with white text will appear — that's normal.</li>
+<li>Copy the command below, then click inside the PowerShell window and <strong>right-click to paste</strong> (Ctrl+V may not work in PowerShell). Then press Enter.</li>
+</ol>
+<div class="cb" id="c4"><span>irm https://claude.ai/install.ps1 | iex</span><button class="cpbtn" onclick="doCopy('c4',this)">Copy</button></div>
+<ol class="steps" style="counter-reset:s 3">
+<li>You'll see text scrolling — that's normal. Wait for it to finish (1–3 minutes).</li>
+<li>When it's done, <strong>close the PowerShell window completely</strong> by clicking the X. Then open a fresh PowerShell window the same way you did before.</li>
+<li>In the new window, type <strong>claude --version</strong> and press Enter. You should see a version number.</li>
+</ol>
+<div class="callout warn"><strong>If you see "claude is not recognized"</strong> — close PowerShell fully and open a fresh window. The list of programs Windows knows about only refreshes when you start a new window.</div>
+<div class="callout warn"><strong>Don't use the Mac command.</strong> Some guides show <code>curl -fsSL https://claude.ai/install.sh | bash</code> — that won't work on Windows. Use the command above.</div>
+`},
+{phase:"Installing tools",title:"Step 5 — Which screen did you see during the install?",fork:true,content:`
+<div class="body">During the install in Step 4, Windows may have taken one of two different routes behind the scenes. Both work fine — we just need to know which one happened so the rest of this guide gives you the right instructions.</div>
+<div class="body"><strong>Look at what happened after you ran that command. Which of these matches what you saw?</strong></div>
+<div class="fork">
+<div class="fcard" id="fc-native" onclick="selFork('native')"><div class="ficon">💻</div><div class="flbl">It finished quietly</div><div class="fsub">The install ran, text scrolled, and it finished. No extra windows appeared. "claude --version" works in PowerShell.</div></div>
+<div class="fcard" id="fc-wsl" onclick="selFork('wsl')"><div class="ficon">🐧</div><div class="flbl">A Linux or Ubuntu window appeared</div><div class="fsub">During or after the install, a new window appeared with words like "Ubuntu", "Linux", or "Installing". You may have been asked to create a username and password.</div></div>
+</div>
+<div class="callout tip"><strong>Not sure which one happened?</strong> Click the Start menu and search for <strong>Ubuntu</strong>. If it shows up as an app, pick the right option. If nothing comes up, pick the left option.</div>
+<div class="bigbox warn"><strong>Pay close attention to which option you pick — it changes your next steps.</strong> If Ubuntu appeared during install, it becomes your permanent home for Claude Code on this PC. The steps ahead will explain exactly what to do with it.</div>
+`},
+{phase:"Installing tools",title:"Step 6 — Finish setting up Ubuntu",wslOnly:true,content:`
+<div class="body">Ubuntu is a lightweight version of Linux that's now running inside your Windows PC. Think of it as a small separate computer living inside your computer. Claude Code lives inside Ubuntu — not in regular Windows.</div>
+<div class="callout warn"><strong>This is your new normal for Claude Code.</strong> Going forward, always open <strong>Ubuntu</strong> — not PowerShell, not Command Prompt — whenever you want to use Claude Code. Ubuntu is your Claude Code home on Windows.</div>
+<ol class="steps">
+<li>Click the <strong>Start menu</strong> and search for <strong>Ubuntu</strong>. Click it to open.</li>
+<li>The first time it opens, it will finish setting up. Wait for it to say <em>"Enter new UNIX username:"</em></li>
+<li>Type a simple lowercase username with no spaces — something like your first name (e.g. <em>jane</em>). Press Enter.</li>
+<li>It will ask for a password. Type one and press Enter. <strong>Nothing will appear on screen as you type — that's normal, it's a security feature.</strong> Type carefully.</li>
+<li>It will ask you to retype the password to confirm. Type it again and press Enter.</li>
+<li>Write your Ubuntu username and password somewhere safe — you'll occasionally need them.</li>
+</ol>
+<div class="callout ok"><strong>Done when:</strong> You see a prompt that looks like <code>jane@DESKTOP:~$</code> — Ubuntu is ready.</div>
+<div class="callout tip"><strong>Pin Ubuntu to your taskbar now.</strong> Right-click the Ubuntu icon while it's open and choose <strong>Pin to taskbar</strong>. You'll use it every time you work with Claude Code.</div>
+`},
+{phase:"Installing tools",title:"Step 7 — Install Claude Code inside Ubuntu",wslOnly:true,content:`
+<div class="body">Claude Code needs to be installed inside Ubuntu separately. This is where it actually lives on your PC.</div>
+<ol class="steps">
+<li>Open <strong>Ubuntu</strong> from your taskbar or Start menu.</li>
+<li>Copy the command below, then click inside the Ubuntu window and <strong>right-click to paste</strong>. Then press Enter.</li>
+</ol>
+<div class="cb" id="c7"><span>curl -fsSL https://claude.ai/install.sh | bash</span><button class="cpbtn" onclick="doCopy('c7',this)">Copy</button></div>
+<ol class="steps" style="counter-reset:s 2">
+<li>Text will scroll while it installs — that's normal. Wait for it to finish and return to a prompt (the line ending in <code>$</code>).</li>
+<li>Close Ubuntu completely by clicking the <strong>X button</strong> on the Ubuntu window. Then reopen Ubuntu from the Start menu or taskbar.</li>
+<li>Type <strong>claude --version</strong> and press Enter. You should see a version number like <em>1.x.x</em></li>
+</ol>
+<div class="callout warn"><strong>If "claude" is not found after reopening Ubuntu</strong> — run this command, then close and reopen Ubuntu once more:<br><br><code>echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc</code></div>
+`},
+{phase:"Installing tools",title:"Step 8 — Install VS Code",content:`
+<div class="body">VS Code (Visual Studio Code) is the text editor where you'll work with Claude. It was built by Microsoft, works natively on Windows, and is free. This is where you'll spend most of your time.</div>
+<ol class="steps">
+<li>Go to <strong>code.visualstudio.com</strong> in your browser and click the big <strong>Download for Windows</strong> button.</li>
+<li>Find the downloaded file in your <strong>Downloads folder</strong>. To get there: open File Explorer (yellow folder icon in your taskbar, or press <strong>Windows key + E</strong>), then click <strong>Downloads</strong> on the left side.</li>
+<li>Double-click the installer file to run it. Click <strong>Next</strong> through the screens — defaults are all fine.</li>
+<li>On the screen titled <strong>"Select Additional Tasks"</strong>, make sure <strong>"Add to PATH"</strong> is checked. This lets you open VS Code from the terminal later.</li>
+<li>Click <strong>Install</strong> and wait. Click <strong>Finish</strong> — VS Code will open automatically.</li>
+</ol>
+<div id="wslvs"></div>
+<div class="callout ok"><strong>Done when:</strong> VS Code opens and you can see the Welcome tab.</div>
+`},
+{phase:"Setting up",title:"Step 9 — Install the Claude Code extension in VS Code",content:`
+<div class="body">Extensions are add-ons that give VS Code extra abilities — like apps on a phone. We're going to install the official Claude Code extension made by Anthropic.</div>
+<ol class="steps">
+<li>Make sure VS Code is open.</li>
+<li>Press <strong>Ctrl + Shift + X</strong> on your keyboard. This opens the Extensions panel on the left side of VS Code.</li>
+<li>In the search box at the top of that panel, type: <strong>Claude Code</strong></li>
+<li>Find the extension published by <strong>Anthropic</strong> and click the blue <strong>Install</strong> button next to it.</li>
+<li>Wait for it to finish — you'll see a spinning icon, then a gear icon when it's done.</li>
+</ol>
+<div class="callout tip"><strong>Extension not appearing after install?</strong> Press <strong>Ctrl + Shift + P</strong>, type <em>Developer: Reload Window</em>, and press Enter. Then check the Extensions panel again.</div>
+`},
+{phase:"Signing in",title:"Step 10 — Sign in to Claude Code",content:`
+<div class="body">Now we connect Claude Code to your Aceable account. This only needs to be done once.</div>
+<ol class="steps">
+<li>Open VS Code and open any file — or create a blank one by pressing <strong>Ctrl + N</strong>. The Claude icon only appears when a file is open.</li>
+<li>Look for the <strong>spark icon (✦)</strong> in the top-right toolbar of VS Code. Click it.</li>
+<li>A browser window opens asking you to authorize Claude Code. Click <strong>Authorize</strong>, then switch back to VS Code.</li>
+<li>VS Code will ask about terminal settings — click <strong>Yes</strong>.</li>
+<li>VS Code will ask if you trust your project folder — click <strong>Yes, I trust the authors</strong>.</li>
+</ol>
+<div class="callout ok"><strong>Done when:</strong> A Claude chat panel is open inside VS Code and you can see your Aceable email in the account area.</div>
+<div class="bigbox warn"><strong>Important — before you continue to Step 11:</strong> You need to have received your Claude.ai invitation from IT and accepted your GitHub organization invite (both arrive by email). If you haven't received these yet, stop here and check your inbox — or follow up with Eric in Slack. You won't be able to complete Step 11 without them.</div>
+`},
+{phase:"Signing in",title:"Step 11 — How to open and use Claude Code",content:`
+<div class="body">There are a few ways to reach Claude inside VS Code. Here are all of them:</div>
+<div style="margin-bottom:1rem">
+<div class="kbrow"><span><strong>Spark icon (✦)</strong> — top-right toolbar of VS Code</span><span style="font-size:12px;color:var(--text3)">needs a file open</span></div>
+<div class="kbrow"><span><strong>Command Palette</strong> → type "Claude Code" → Enter</span><span class="kbd">Ctrl+Shift+P</span></div>
+<div class="kbrow"><span><strong>Status bar</strong> — bottom-right corner of VS Code</span><span style="font-size:12px;color:var(--text3)">✱ Claude Code</span></div>
+</div>
+<hr class="div">
+<p style="font-size:13px;color:var(--text2);margin-bottom:.65rem;font-weight:600">Useful shortcuts once Claude is open:</p>
+<div>
+<div class="kbrow"><span>Start a new conversation</span><span class="kbd">Ctrl+N</span></div>
+<div class="kbrow"><span>Switch between your code and Claude</span><span class="kbd">Ctrl+Esc</span></div>
+<div class="kbrow"><span>Open Extensions panel</span><span class="kbd">Ctrl+Shift+X</span></div>
+<div class="kbrow"><span>Open Command Palette</span><span class="kbd">Ctrl+Shift+P</span></div>
+</div>
+<div class="callout tip" style="margin-top:.85rem"><strong>Talk to it naturally.</strong> Just type what you want like you'd ask a teammate: "What does this file do?" or "Help me understand this code." No special commands needed.</div>
+<div class="bigbox warn" style="margin-top:.85rem"><strong>Reminder before Step 12:</strong> Make sure you've accepted your GitHub organization invite from IT — it comes as an email from GitHub saying you've been invited to join the aceable organization. You won't be able to clone the codebase without it.</div>
+`},
+{phase:"First steps",title:"Step 12 — Get access to Aceable's shared codebase",content:`
+<div class="bigbox warn"><strong>Before starting this step:</strong> You need to have accepted your GitHub organization invite from IT. It arrives as an email from GitHub saying you've been invited to join the aceable organization. Find that email and click Accept before continuing.</div>
+<div class="body">Now we'll pull down Aceable's shared codebase. This gives Claude access to real Aceable products so it can answer questions about how things actually work.</div>
+<ol class="steps">
+<li>Open VS Code and open the Claude Code panel (spark icon ✦ or Ctrl+Shift+P → Claude Code).</li>
+<li>In the Claude chat, paste this message and press Enter:</li>
+</ol>
+<div class="cb" id="c12"><span>Clone https://github.com/aceable/acewares.git — afterwards, start all new Claude sessions from that folder. Open the folder in VS Code so I can see the files.</span><button class="cpbtn" onclick="doCopy('c12',this)">Copy</button></div>
+<ol class="steps" style="counter-reset:s 2">
+<li>Claude will run the clone for you. If it asks for permission to run a command, click <strong>Allow</strong>.</li>
+<li>When it's done, you'll see the acewares folder appear in VS Code's file explorer panel on the left.</li>
+</ol>
+<div class="callout ok"><strong>Done when:</strong> The acewares folder is visible in VS Code and Claude can answer questions about it.</div>
+`},
+{phase:"Done!",title:"You're all set",done:true,content:`
+<div style="text-align:center;padding:1.25rem 0">
+<div class="done-icon">✓</div>
+<h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:.5rem">Setup complete</h2>
+<p style="font-size:14.5px;color:var(--text2);line-height:1.7;margin-bottom:1.1rem">Here's everything you've installed and configured:</p>
+<div class="cl">
+${["IT ticket submitted — Claude.ai access granted","GitHub account created with ace-firstname-lastinitial","Git for Windows installed","Claude Code installed (native or Ubuntu/WSL path)","Ubuntu configured as your Claude Code home (WSL users)","VS Code installed","Claude Code extension installed","Signed in with your Aceable account","Aceable codebase cloned and ready"].map(i=>`<div class="ci"><span class="ck">✓</span><span>${i}</span></div>`).join('')}
+</div>
+<p style="font-size:13px;color:var(--text3);margin-bottom:1.25rem">Stuck on anything? First ask Claude — if that doesn't resolve it, post in <strong style="color:var(--text2)">#guild-ai</strong> on Slack. The team is there to help.</p>
+<a class="lbtn" href="https://aceable.atlassian.net/wiki/spaces/DEV/pages/4534370305/Setup+AI+On+Your+Computer" target="_blank">Full Confluence guide →</a>
+</div>
+`}
+];
+
+function getSteps(){return ALL.filter(s=>!(s.wslOnly&&path!=='wsl'));}
+function selFork(p){path=p;document.querySelectorAll('.fcard').forEach(c=>c.classList.remove('sel'));const el=document.getElementById('fc-'+p);if(el)el.classList.add('sel');const btn=document.getElementById('fnxt');if(btn)btn.disabled=false;}
+function doCopy(id,btn){const t=document.getElementById(id).querySelector('span').textContent;navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);});}
+
+function render(){
+  const steps=getSteps(),s=steps[cur],total=steps.length-1;
+  document.getElementById('prog').innerHTML=steps.map((_,i)=>`<div class="seg ${i<cur?'done':i===cur?'active':''}"></div>`).join('');
+  document.getElementById('plbl').textContent=s.done?'Complete!':`Step ${cur} of ${total}`;
+  const main=document.getElementById('main');
+  if(s.done){main.innerHTML=`<div class="phase">${s.phase}</div><div class="stitle">${s.title}</div>${s.content}`;return;}
+  const isFirst=cur===0,isLast=cur===steps.length-2;
+  main.innerHTML=`
+    <div class="phase">${s.phase}${!isFirst?' · Step '+cur+' of '+total:''}</div>
+    <div class="stitle">${s.title}</div>
+    ${s.content}
+    ${!isFirst ? HELP : ''}
+    <div class="nav">
+      ${!isFirst?`<button class="bbk" onclick="go(-1)">← Back</button>`:'<span></span>'}
+      ${s.fork?`<button class="bnx" id="fnxt" onclick="go(1)" disabled>Continue →</button>`:`<button class="bnx" onclick="go(1)">${isLast?'Finish ✓':'Next →'}</button>`}
+    </div>`;
+  if(s.fork&&path){const el=document.getElementById('fc-'+path);if(el)el.classList.add('sel');const btn=document.getElementById('fnxt');if(btn)btn.disabled=false;}
+  if(s.title.includes('VS Code')&&!s.title.includes('extension')&&path==='wsl'){const el=document.getElementById('wslvs');if(el)el.innerHTML=`<div class="callout tip"><strong>WSL users — one extra step after VS Code installs:</strong><br>1. Press <strong>Ctrl+Shift+X</strong> to open Extensions and search for <strong>WSL</strong>. Install the <em>WSL</em> extension by Microsoft.<br>2. Press <strong>Ctrl+Shift+P</strong>, type <em>WSL: Connect to WSL</em>, and press Enter.<br>3. You'll know it worked when you see <strong>WSL: Ubuntu</strong> in green in the bottom-left corner of VS Code.</div>`;}
+}
+
+function go(dir){const steps=getSteps();cur=Math.max(0,Math.min(steps.length-1,cur+dir));render();window.scrollTo({top:0,behavior:'smooth'});}
+render();
+</script>
+</body>
+</html>
