@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Setting Up Claude Code on Mac — Aceable</title>
+<title>Setting Up Claude Code on Windows — Aceable</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -55,6 +55,13 @@
   .cpbtn { font-size: 11px; font-weight: 600; color: var(--text3); border: 1px solid var(--border2); background: transparent; border-radius: 5px; padding: 3px 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0; font-family: inherit; transition: all .15s; }
   .cpbtn:hover { background: var(--bg); color: var(--text); }
   .cpbtn.copied { color: var(--text-ok); border-color: var(--green); }
+  .fork { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1rem; }
+  .fcard { border: 1.5px solid var(--border2); border-radius: var(--r); padding: 1.1rem; cursor: pointer; transition: border-color .2s, background .2s; text-align: center; }
+  .fcard:hover { border-color: var(--blue); background: var(--bg-info); }
+  .fcard.sel { border-color: var(--blue); background: var(--bg-info); }
+  .ficon { font-size: 30px; margin-bottom: .5rem; }
+  .flbl { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: .3rem; }
+  .fsub { font-size: 12px; color: var(--text3); line-height: 1.45; }
   .kbrow { display: flex; justify-content: space-between; font-size: 13.5px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; color: var(--text2); }
   .kbrow:last-child { border-bottom: none; }
   .kbd { font-family: var(--mono); background: var(--bg2); border: 1px solid var(--border2); padding: 2px 8px; border-radius: 4px; font-size: 11.5px; color: var(--text); white-space: nowrap; }
@@ -64,6 +71,7 @@
   .bbk:hover { background: var(--bg2); }
   .bnx { background: var(--blue); color: #fff; border: none; padding: 10px 24px; border-radius: var(--r); font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; margin-left: auto; transition: background .15s; }
   .bnx:hover { background: var(--blue-dk); }
+  .bnx:disabled { opacity: .4; cursor: default; }
   .done-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-ok); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; color: var(--text-ok); }
   .cl { text-align: left; background: var(--bg2); border-radius: var(--r); padding: .9rem 1.1rem; margin-bottom: 1.25rem; }
   .ci { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
@@ -72,13 +80,13 @@
   .lbtn { display: inline-block; background: var(--blue); color: #fff; padding: 11px 22px; border-radius: var(--r); font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; border: none; font-family: inherit; transition: background .15s; }
   .lbtn:hover { background: var(--blue-dk); }
   code { font-family: var(--mono); font-size: 12.5px; background: var(--bg2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; color: var(--text); }
-  @media (max-width: 500px) { .stitle { font-size: 18px; } header .sub { display: none; } }
+  @media (max-width: 500px) { .fork { grid-template-columns: 1fr; } .stitle { font-size: 18px; } header .sub { display: none; } }
 </style>
 </head>
 <body>
 <header>
   <div class="logo">Aceable · Claude Code Setup</div>
-  <div class="sub">Mac Guide</div>
+  <div class="sub">Windows PC Guide</div>
 </header>
 <div class="wrap">
   <div class="prog" id="prog"></div>
@@ -86,19 +94,18 @@
   <div id="main"></div>
 </div>
 <script>
-let cur=0;
+let cur=0, path=null;
 
 const HELP = `<div class="helpbox"><strong>🟢 Stuck on this step?</strong><ol><li>Try asking <strong>Claude (claude.ai)</strong> directly — describe what happened and paste any error message.</li><li>Still stuck? Take a <strong>screenshot and upload it to Claude</strong> — it can see exactly what you're seeing.</li><li>If that still doesn't resolve it, post in <strong>#guild-ai</strong> on Slack. Someone will help.</li></ol></div>`;
 
 const ALL=[
-{phase:"Welcome",title:"Let's get you set up with Claude Code on your Mac",content:`
+{phase:"Welcome",title:"Let's get you set up with Claude Code on Windows",content:`
 <div class="body">This guide walks you through everything — from requesting access all the way to your first conversation with Claude. No tech experience needed. Just follow one step at a time and don't skip ahead.</div>
 <div class="callout tip"><strong>What is Claude Code?</strong> An AI assistant that lives inside your text editor. It can read your files, help write and review work, and answer questions about Aceable's products. Think of it as a very smart teammate that never sleeps.</div>
-<div class="callout tip"><strong>How long will this take?</strong> About 45–60 minutes end to end. You can pause at any step and come back — just remember where you left off using the progress bar at the top.</div>
-<div class="helpbox"><strong>🟢 Stuck at any point?</strong><ol><li>Try asking <strong>Claude (claude.ai)</strong> directly — describe what happened and paste any error message.</li><li>Still stuck? Take a <strong>screenshot and upload it to Claude</strong> — it can see exactly what you're seeing.</li><li>If that still doesn't resolve it, post in <strong>#guild-ai</strong> on Slack. Someone will help.</li></ol></div>
+<div class="callout warn"><strong>Windows PCs only.</strong> This guide is written specifically for Windows. Mac users should follow the Mac setup guide instead.</div>
 `},
 {phase:"Getting access",title:"Step 1 — Request access from IT via Slack",content:`
-<div class="body">Before you can use Claude Code, IT needs to set up your account. This takes 2 minutes to submit and usually comes back same-day.</div>
+<div class="body">Before you can use Claude Code, IT needs to provision your account. This takes 2 minutes to submit and usually comes back same-day.</div>
 <ol class="steps">
 <li>Open Slack. In the message box at the bottom of any channel, type <strong>/assist</strong> and press Enter. Slack will leave it in the field unsent — just press Enter once more to open the IT request form.</li>
 <li>When the form appears, choose <strong>IT ticket</strong>.</li>
@@ -106,7 +113,7 @@ const ALL=[
 <li>Skip the description and click <strong>Submit</strong>.</li>
 </ol>
 <div class="callout tip"><strong>Who handles these?</strong> Usually Eric. If you haven't heard back after a day, ping him directly in Slack.</div>
-<div class="callout ok"><strong>What you'll receive from IT:</strong> An invitation to join the Aceable GitHub organization + access to Claude.ai with your work email. You'll need both before you can finish this guide — so submit the ticket now even if you're continuing later.</div>
+<div class="callout ok"><strong>What you'll receive from IT:</strong> An invitation to join the Aceable GitHub organization + access to Claude.ai with your work email. You'll need both before you can finish this guide — so submit the ticket now even if you're planning to continue later.</div>
 `},
 {phase:"Getting access",title:"Step 2 — Create your GitHub account",content:`
 <div class="body">GitHub is where Aceable's code lives in the cloud. You need an account so IT can give you access to the right projects.</div>
@@ -124,188 +131,138 @@ const ALL=[
 </ol>
 <div class="callout ok"><strong>Done when:</strong> You can log in to github.com and see your dashboard.</div>
 `},
-{phase:"Installing tools",title:"Step 3 — Open Terminal on your Mac",content:`
-<div class="body">Terminal is a built-in Mac app that lets you type commands directly to your computer. It looks a bit intimidating at first — a plain window with text — but you'll only need to use it for a few steps and we'll tell you exactly what to type.</div>
+{phase:"Installing tools",title:"Step 3 — Install Git for Windows",content:`
+<div class="body">Git for Windows is a behind-the-scenes tool that Claude Code needs to work on a PC. It won't open on its own or get in your way — it just needs to be installed. Takes about 3 minutes.</div>
 <ol class="steps">
-<li>Press <strong>Command + Space</strong> on your keyboard. This opens Spotlight Search — a search bar that appears in the middle of your screen.</li>
-<li>Type <strong>Terminal</strong> and press Enter.</li>
-<li>A window opens with a dark or white background and a blinking cursor. That's Terminal — you're in!</li>
+<li>Open your browser and go to <strong>git-scm.com/download/win</strong> — the download starts automatically.</li>
+<li>Find the downloaded file. To get to your Downloads folder: open <strong>File Explorer</strong> (the yellow folder icon in your taskbar, or press <strong>Windows key + E</strong>), then click <strong>Downloads</strong> on the left side.</li>
+<li>Double-click the file to run it. It'll be named something like <em>Git-2.x.x-64-bit.exe</em></li>
+<li>The installer shows several screens. Click <strong>Next</strong> through all of them — all default settings are correct, don't change anything.</li>
+<li>Click <strong>Install</strong> and wait for it to finish.</li>
+<li>Click <strong>Finish</strong>.</li>
 </ol>
-<div class="callout tip"><strong>Pin Terminal to your Dock.</strong> While Terminal is open, right-click its icon in the Dock at the bottom of your screen and choose <strong>Options → Keep in Dock</strong>. You'll use it a few more times today.</div>
-<div class="callout tip"><strong>How to paste in Terminal:</strong> Use <strong>Command + V</strong> to paste — same as everywhere else on Mac. Each time we give you a command to run, copy it, click inside Terminal, paste it, and press Enter.</div>
+<div class="callout tip"><strong>Don't restart your computer yet</strong> — wait until after the next step.</div>
 `},
-{phase:"Installing tools",title:"Step 4 — Install Homebrew",content:`
-<div class="body">Homebrew is like an app store for developer tools — it makes it easy to install the things Claude Code needs. This is a Mac-only tool that makes everything else much simpler.</div>
+{phase:"Installing tools",title:"Step 4 — Install Claude Code",content:`
+<div class="body">Now we install Claude Code itself. We'll use PowerShell — a built-in Windows tool that lets you run commands. You only need to paste one line.</div>
 <ol class="steps">
-<li>Open <strong>Terminal</strong> (Command + Space → type Terminal → Enter).</li>
-<li>Copy the command below, paste it into Terminal, and press Enter.</li>
+<li>Click the <strong>Start menu</strong> (Windows icon in the bottom-left of your screen) and type <strong>PowerShell</strong>.</li>
+<li>Click <strong>Windows PowerShell</strong> to open it. A blue or dark window with white text will appear — that's normal.</li>
+<li>Copy the command below, then click inside the PowerShell window and <strong>right-click to paste</strong> (Ctrl+V may not work in PowerShell). Then press Enter.</li>
 </ol>
-<div class="cb" id="c4"><span>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</span><button class="cpbtn" onclick="doCopy('c4',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 2">
-<li>Your Mac may ask for your <strong>Mac login password</strong>. Type it and press Enter. <strong>Nothing will appear as you type — that's normal.</strong></li>
-<li>Your Mac may ask <em>"Do you want to install command line developer tools?"</em> — click <strong>Install</strong> and wait for it to finish. Then press Enter to continue.</li>
-<li>Homebrew will take 5–10 minutes. You'll see a lot of text scrolling — that's normal. Wait for it to finish.</li>
-<li>When done, it may show two lines starting with <code>export PATH=</code> and <code>eval</code>. If you see those, copy and paste them one at a time into Terminal and press Enter after each.</li>
-</ol>
-<div class="callout tip"><strong>How do you know it worked?</strong> Type <code>brew --version</code> and press Enter. You should see a version number like <em>Homebrew 4.x.x</em></div>
-`},
-{phase:"Installing tools",title:"Step 5 — Install nvm (Node Version Manager)",content:`
-<div class="body">nvm is a small tool that manages which version of Node.js is installed on your Mac. Think of it as a version switcher — it makes sure Claude Code gets exactly the right version it needs.</div>
-<ol class="steps">
-<li>In Terminal, copy and paste this command and press Enter:</li>
-</ol>
-<div class="cb" id="c5"><span>curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash</span><button class="cpbtn" onclick="doCopy('c5',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 1">
-<li>Wait for it to finish. You'll see a few lines of text.</li>
-<li>Now <strong>close Terminal completely</strong> — press <strong>Command + Q</strong>. Then reopen it (Command + Space → Terminal). This is required for nvm to work.</li>
-<li>Type this to confirm nvm installed correctly:</li>
-</ol>
-<div class="cb" id="c5b"><span>nvm --version</span><button class="cpbtn" onclick="doCopy('c5b',this)">Copy</button></div>
-<div class="callout ok"><strong>Done when:</strong> You see a version number like <em>0.39.7</em></div>
-<div class="callout warn"><strong>If you see "nvm: command not found"</strong> — you need to close and reopen Terminal. The install added nvm to your shell profile, but it only loads in fresh Terminal windows.</div>
-`},
-{phase:"Installing tools",title:"Step 6 — Install Node.js",content:`
-<div class="body">Node.js is the engine that powers Claude Code behind the scenes. You won't interact with it directly — it just needs to be there. We're installing version 24, which is the version Aceable recommends.</div>
-<ol class="steps">
-<li>In Terminal, copy and paste this command and press Enter:</li>
-</ol>
-<div class="cb" id="c6"><span>nvm install 24</span><button class="cpbtn" onclick="doCopy('c6',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 1">
-<li>Wait for it to download and install. You'll see a progress bar — that's normal.</li>
-<li>When it's done, set it as your default version:</li>
-</ol>
-<div class="cb" id="c6b"><span>nvm use 24</span><button class="cpbtn" onclick="doCopy('c6b',this)">Copy</button></div>
+<div class="cb" id="c4"><span>irm https://claude.ai/install.ps1 | iex</span><button class="cpbtn" onclick="doCopy('c4',this)">Copy</button></div>
 <ol class="steps" style="counter-reset:s 3">
-<li>Confirm it worked:</li>
+<li>You'll see text scrolling — that's normal. Wait for it to finish (1–3 minutes).</li>
+<li>When it's done, <strong>close the PowerShell window completely</strong> by clicking the X. Then open a fresh PowerShell window the same way you did before.</li>
+<li>In the new window, type <strong>claude --version</strong> and press Enter. You should see a version number.</li>
 </ol>
-<div class="cb" id="c6c"><span>node --version</span><button class="cpbtn" onclick="doCopy('c6c',this)">Copy</button></div>
-<div class="callout ok"><strong>Done when:</strong> You see <em>v24.x.x</em> — Node.js is ready.</div>
+<div class="callout warn"><strong>If you see "claude is not recognized"</strong> — close PowerShell fully and open a fresh window. The list of programs Windows knows about only refreshes when you start a new window.</div>
+<div class="callout warn"><strong>Don't use the Mac command.</strong> Some guides show <code>curl -fsSL https://claude.ai/install.sh | bash</code> — that won't work on Windows. Use the command above.</div>
 `},
-{phase:"Installing tools",title:"Step 7 — Install Claude Code",content:`
-<div class="body">Now we install Claude Code itself. This is the AI tool that will live in your terminal and inside VS Code.</div>
-<ol class="steps">
-<li>In Terminal, copy and paste this command and press Enter:</li>
-</ol>
-<div class="cb" id="c7"><span>npm install -g @anthropic-ai/claude-code</span><button class="cpbtn" onclick="doCopy('c7',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 1">
-<li>Wait for it to finish — you'll see text scrolling, that's normal. Takes about 1–2 minutes.</li>
-<li>Confirm it installed correctly:</li>
-</ol>
-<div class="cb" id="c7b"><span>claude --version</span><button class="cpbtn" onclick="doCopy('c7b',this)">Copy</button></div>
-<div class="callout ok"><strong>Done when:</strong> You see a version number — Claude Code is installed!</div>
-<div class="callout warn"><strong>If you see "permission denied"</strong> — do NOT use sudo. Instead, close Terminal, reopen it, and try the install command again.</div>
+{phase:"Installing tools",title:"Step 5 — Which screen did you see during the install?",fork:true,content:`
+<div class="body">During the install in Step 4, Windows may have taken one of two different routes behind the scenes. Both work fine — we just need to know which one happened so the rest of this guide gives you the right instructions.</div>
+<div class="body"><strong>Look at what happened after you ran that command. Which of these matches what you saw?</strong></div>
+<div class="fork">
+<div class="fcard" id="fc-native" onclick="selFork('native')"><div class="ficon">💻</div><div class="flbl">It finished quietly</div><div class="fsub">The install ran, text scrolled, and it finished. No extra windows appeared. "claude --version" works in PowerShell.</div></div>
+<div class="fcard" id="fc-wsl" onclick="selFork('wsl')"><div class="ficon">🐧</div><div class="flbl">A Linux or Ubuntu window appeared</div><div class="fsub">During or after the install, a new window appeared with words like "Ubuntu", "Linux", or "Installing". You may have been asked to create a username and password.</div></div>
+</div>
+<div class="callout tip"><strong>Not sure which one happened?</strong> Click the Start menu and search for <strong>Ubuntu</strong>. If it shows up as an app, pick the right option. If nothing comes up, pick the left option.</div>
+<div class="bigbox warn"><strong>Pay close attention to which option you pick — it changes your next steps.</strong> If Ubuntu appeared during install, it becomes your permanent home for Claude Code on this PC. The steps ahead will explain exactly what to do with it.</div>
 `},
-{phase:"Signing in",title:"Step 8 — Sign in to Claude Code",content:`
-<div class="body">Now we connect Claude Code to your Aceable account. This only needs to be done once — after that, Claude remembers you.</div>
-<div class="bigbox warn"><strong>Before this step:</strong> Make sure you've received your Claude.ai invitation from IT. It arrives as an email to your Aceable address. If you haven't received it yet, stop here and check your inbox — or follow up with Eric in Slack.</div>
+{phase:"Installing tools",title:"Step 6 — Finish setting up Ubuntu",wslOnly:true,content:`
+<div class="body">Ubuntu is a lightweight version of Linux that's now running inside your Windows PC. Think of it as a small separate computer living inside your computer. Claude Code lives inside Ubuntu — not in regular Windows.</div>
+<div class="callout warn"><strong>This is your new normal for Claude Code.</strong> Going forward, always open <strong>Ubuntu</strong> — not PowerShell, not Command Prompt — whenever you want to use Claude Code. Ubuntu is your Claude Code home on Windows.</div>
 <ol class="steps">
-<li>In Terminal, type this and press Enter:</li>
+<li>Click the <strong>Start menu</strong> and search for <strong>Ubuntu</strong>. Click it to open.</li>
+<li>The first time it opens, it will finish setting up. Wait for it to say <em>"Enter new UNIX username:"</em></li>
+<li>Type a simple lowercase username with no spaces — something like your first name (e.g. <em>jane</em>). Press Enter.</li>
+<li>It will ask for a password. Type one and press Enter. <strong>Nothing will appear on screen as you type — that's normal, it's a security feature.</strong> Type carefully.</li>
+<li>It will ask you to retype the password to confirm. Type it again and press Enter.</li>
+<li>Write your Ubuntu username and password somewhere safe — you'll occasionally need them.</li>
 </ol>
-<div class="cb" id="c8"><span>claude</span><button class="cpbtn" onclick="doCopy('c8',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 1">
-<li>A browser window will automatically open asking you to sign in to Claude. Sign in with your <strong>Aceable email address</strong>.</li>
-<li>Click <strong>Authorize</strong> when prompted.</li>
-<li>Switch back to Terminal — you should see a welcome message from Claude.</li>
-<li>Type <strong>exit</strong> and press Enter to close the Claude session for now.</li>
-</ol>
-<div class="callout ok"><strong>Done when:</strong> You saw the Claude welcome screen in Terminal. Authentication is saved — you won't need to do this again.</div>
+<div class="callout ok"><strong>Done when:</strong> You see a prompt that looks like <code>jane@DESKTOP:~$</code> — Ubuntu is ready.</div>
+<div class="callout tip"><strong>Pin Ubuntu to your taskbar now.</strong> Right-click the Ubuntu icon while it's open and choose <strong>Pin to taskbar</strong>. You'll use it every time you work with Claude Code.</div>
 `},
-{phase:"Installing tools",title:"Step 9 — Install VS Code",content:`
-<div class="body">VS Code (Visual Studio Code) is the text editor where you'll spend most of your time working with Claude. It's free, made by Microsoft, and works beautifully on Mac.</div>
+{phase:"Installing tools",title:"Step 7 — Install Claude Code inside Ubuntu",wslOnly:true,content:`
+<div class="body">Claude Code needs to be installed inside Ubuntu separately. This is where it actually lives on your PC.</div>
 <ol class="steps">
-<li>Go to <strong>code.visualstudio.com</strong> in your browser and click the big <strong>Download for Mac</strong> button.</li>
-<li>Find the downloaded file. Open <strong>Finder</strong> (the smiley face icon in your Dock), then click <strong>Downloads</strong> on the left side.</li>
-<li>You'll see a file called <em>VSCode-darwin-universal.zip</em> or similar. Double-click it to unzip it.</li>
-<li>A <strong>Visual Studio Code</strong> app icon will appear. <strong>Drag it into your Applications folder.</strong> In Finder, click <strong>Applications</strong> on the left side to find it.</li>
-<li>Open VS Code from your Applications folder. Your Mac may ask <em>"Are you sure you want to open this?"</em> — click <strong>Open</strong>.</li>
+<li>Open <strong>Ubuntu</strong> from your taskbar or Start menu.</li>
+<li>Copy the command below, then click inside the Ubuntu window and <strong>right-click to paste</strong>. Then press Enter.</li>
 </ol>
-<div class="callout tip"><strong>Add VS Code to your Dock.</strong> While VS Code is open, right-click its icon in the Dock and choose <strong>Options → Keep in Dock</strong>.</div>
+<div class="cb" id="c7"><span>curl -fsSL https://claude.ai/install.sh | bash</span><button class="cpbtn" onclick="doCopy('c7',this)">Copy</button></div>
+<ol class="steps" style="counter-reset:s 2">
+<li>Text will scroll while it installs — that's normal. Wait for it to finish and return to a prompt (the line ending in <code>$</code>).</li>
+<li>Close Ubuntu completely by clicking the <strong>X button</strong> on the Ubuntu window. Then reopen Ubuntu from the Start menu or taskbar.</li>
+<li>Type <strong>claude --version</strong> and press Enter. You should see a version number like <em>1.x.x</em></li>
+</ol>
+<div class="callout warn"><strong>If "claude" is not found after reopening Ubuntu</strong> — run this command, then close and reopen Ubuntu once more:<br><br><code>echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc && source ~/.bashrc</code></div>
+`},
+{phase:"Installing tools",title:"Step 8 — Install VS Code",content:`
+<div class="body">VS Code (Visual Studio Code) is the text editor where you'll work with Claude. It was built by Microsoft, works natively on Windows, and is free. This is where you'll spend most of your time.</div>
+<ol class="steps">
+<li>Go to <strong>code.visualstudio.com</strong> in your browser and click the big <strong>Download for Windows</strong> button.</li>
+<li>Find the downloaded file in your <strong>Downloads folder</strong>. To get there: open File Explorer (yellow folder icon in your taskbar, or press <strong>Windows key + E</strong>), then click <strong>Downloads</strong> on the left side.</li>
+<li>Double-click the installer file to run it. Click <strong>Next</strong> through the screens — defaults are all fine.</li>
+<li>On the screen titled <strong>"Select Additional Tasks"</strong>, make sure <strong>"Add to PATH"</strong> is checked. This lets you open VS Code from the terminal later.</li>
+<li>Click <strong>Install</strong> and wait. Click <strong>Finish</strong> — VS Code will open automatically.</li>
+</ol>
+<div id="wslvs"></div>
 <div class="callout ok"><strong>Done when:</strong> VS Code opens and you can see the Welcome tab.</div>
 `},
-{phase:"Installing tools",title:"Step 10 — Connect VS Code to Terminal",content:`
-<div class="body">This step lets you open VS Code directly from Terminal with a simple command. It only takes a minute and makes your life much easier later on.</div>
-<ol class="steps">
-<li>Inside VS Code, press <strong>Command + Shift + P</strong>. A search bar drops down from the top — this is the Command Palette. You'll use this a lot.</li>
-<li>Type: <strong>Shell Command</strong> and look for <strong>"Shell Command: Install 'code' command in PATH"</strong>. Click it.</li>
-<li>VS Code will ask for your Mac password — enter it and click OK.</li>
-<li>You'll see a success notification at the bottom of VS Code.</li>
-</ol>
-<div class="callout tip"><strong>What does this do?</strong> Now you can type <code>code .</code> in Terminal to open any folder in VS Code instantly.</div>
-<div class="callout ok"><strong>Done when:</strong> You see the success notification in VS Code.</div>
-`},
-{phase:"Setting up",title:"Step 11 — Install the Claude Code extension in VS Code",content:`
-<div class="body">Extensions are add-ons that give VS Code extra abilities — like apps on a phone. We're installing the official Claude Code extension made by Anthropic. This is how most people at Aceable interact with Claude day-to-day.</div>
+{phase:"Setting up",title:"Step 9 — Install the Claude Code extension in VS Code",content:`
+<div class="body">Extensions are add-ons that give VS Code extra abilities — like apps on a phone. We're going to install the official Claude Code extension made by Anthropic.</div>
 <ol class="steps">
 <li>Make sure VS Code is open.</li>
-<li>Press <strong>Command + Shift + X</strong> to open the Extensions panel on the left side of VS Code.</li>
-<li>In the search box at the top, type: <strong>Claude Code</strong></li>
+<li>Press <strong>Ctrl + Shift + X</strong> on your keyboard. This opens the Extensions panel on the left side of VS Code.</li>
+<li>In the search box at the top of that panel, type: <strong>Claude Code</strong></li>
 <li>Find the extension published by <strong>Anthropic</strong> and click the blue <strong>Install</strong> button next to it.</li>
 <li>Wait for it to finish — you'll see a spinning icon, then a gear icon when it's done.</li>
 </ol>
-<div class="callout tip"><strong>Extension not appearing after install?</strong> Press <strong>Command + Shift + P</strong>, type <em>Developer: Reload Window</em>, and press Enter.</div>
+<div class="callout tip"><strong>Extension not appearing after install?</strong> Press <strong>Ctrl + Shift + P</strong>, type <em>Developer: Reload Window</em>, and press Enter. Then check the Extensions panel again.</div>
 `},
-{phase:"Setting up",title:"Step 12 — First-time setup in VS Code",content:`
-<div class="body">The first time you open Claude Code inside VS Code, it needs a couple of quick things from you. Here's exactly what to expect.</div>
+{phase:"Signing in",title:"Step 10 — Sign in to Claude Code",content:`
+<div class="body">Now we connect Claude Code to your Aceable account. This only needs to be done once.</div>
 <ol class="steps">
-<li>Open VS Code and open any file — or press <strong>Command + N</strong> to create a blank one. <em>The Claude icon only appears when a file is open.</em></li>
+<li>Open VS Code and open any file — or create a blank one by pressing <strong>Ctrl + N</strong>. The Claude icon only appears when a file is open.</li>
 <li>Look for the <strong>spark icon (✦)</strong> in the top-right toolbar of VS Code. Click it.</li>
 <li>A browser window opens asking you to authorize Claude Code. Click <strong>Authorize</strong>, then switch back to VS Code.</li>
-<li>VS Code will ask about terminal settings — click <strong>Yes</strong>. This lets you use Shift+Enter for new lines.</li>
+<li>VS Code will ask about terminal settings — click <strong>Yes</strong>.</li>
 <li>VS Code will ask if you trust your project folder — click <strong>Yes, I trust the authors</strong>.</li>
 </ol>
 <div class="callout ok"><strong>Done when:</strong> A Claude chat panel is open inside VS Code and you can see your Aceable email in the account area.</div>
-<div class="bigbox warn"><strong>Important — before you continue to Step 13:</strong> You need to have accepted your GitHub organization invite from IT. It arrives as an email from GitHub. Check your inbox and accept it before moving on.</div>
+<div class="bigbox warn"><strong>Important — before you continue to Step 11:</strong> You need to have received your Claude.ai invitation from IT and accepted your GitHub organization invite (both arrive by email). If you haven't received these yet, stop here and check your inbox — or follow up with Eric in Slack. You won't be able to complete Step 11 without them.</div>
 `},
-{phase:"Setting up",title:"Step 13 — Install the GitHub CLI",content:`
-<div class="body">The GitHub CLI is a tool that lets Claude connect to GitHub on your behalf — cloning repos, creating branches, and more. It's a one-time setup.</div>
-<ol class="steps">
-<li>Open <strong>Terminal</strong> and paste this command, then press Enter:</li>
-</ol>
-<div class="cb" id="c13"><span>brew install gh</span><button class="cpbtn" onclick="doCopy('c13',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 1">
-<li>Wait for it to finish. Then connect it to your GitHub account:</li>
-</ol>
-<div class="cb" id="c13b"><span>gh auth login</span><button class="cpbtn" onclick="doCopy('c13b',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 2">
-<li>It will ask you a few questions. Answer them like this:<br>• <strong>Where do you use GitHub?</strong> → GitHub.com<br>• <strong>What is your preferred protocol?</strong> → HTTPS<br>• <strong>How would you like to authenticate?</strong> → Login with a web browser</li>
-<li>Copy the one-time code it shows you, then press Enter. Your browser will open — paste the code and click <strong>Authorize</strong>.</li>
-<li>Switch back to Terminal — you should see a success message.</li>
-</ol>
-<div class="callout ok"><strong>Done when:</strong> Terminal says "Logged in as ace-yourname" — GitHub CLI is connected.</div>
-`},
-{phase:"First steps",title:"Step 14 — Get access to Aceable's shared codebase",content:`
-<div class="bigbox warn"><strong>Before starting this step:</strong> You need to have accepted your GitHub organization invite from IT. It arrives as an email from GitHub saying you've been invited to join the aceable organization. Find that email and click Accept before continuing.</div>
-<div class="body">Now we'll pull down Aceable's shared codebase. This gives Claude access to real Aceable products so it can answer questions about how things actually work at Aceable.</div>
-<ol class="steps">
-<li>Open VS Code and open the Claude Code panel (spark icon ✦ or Command+Shift+P → Claude Code).</li>
-<li>In the Claude chat, paste this message and press Enter:</li>
-</ol>
-<div class="cb" id="c14"><span>Clone https://github.com/aceable/acewares.git — afterwards, start all new Claude sessions from that folder. Open the folder in VS Code so I can see the files.</span><button class="cpbtn" onclick="doCopy('c14',this)">Copy</button></div>
-<ol class="steps" style="counter-reset:s 2">
-<li>Claude will run the clone for you. If it asks for permission to run a command, click <strong>Allow</strong>.</li>
-<li>When it's done, you'll see the acewares folder appear in VS Code's file explorer panel on the left.</li>
-</ol>
-<div class="callout ok"><strong>Done when:</strong> The acewares folder is visible in VS Code and Claude can answer questions about it.</div>
-<div class="callout tip"><strong>Going forward:</strong> Always open VS Code from the acewares folder to give Claude the most context about Aceable's products.</div>
-`},
-{phase:"First steps",title:"Step 15 — How to open and use Claude Code",content:`
+{phase:"Signing in",title:"Step 11 — How to open and use Claude Code",content:`
 <div class="body">There are a few ways to reach Claude inside VS Code. Here are all of them:</div>
 <div style="margin-bottom:1rem">
 <div class="kbrow"><span><strong>Spark icon (✦)</strong> — top-right toolbar of VS Code</span><span style="font-size:12px;color:var(--text3)">needs a file open</span></div>
-<div class="kbrow"><span><strong>Command Palette</strong> → type "Claude Code" → Enter</span><span class="kbd">⌘+Shift+P</span></div>
+<div class="kbrow"><span><strong>Command Palette</strong> → type "Claude Code" → Enter</span><span class="kbd">Ctrl+Shift+P</span></div>
 <div class="kbrow"><span><strong>Status bar</strong> — bottom-right corner of VS Code</span><span style="font-size:12px;color:var(--text3)">✱ Claude Code</span></div>
 </div>
 <hr class="div">
 <p style="font-size:13px;color:var(--text2);margin-bottom:.65rem;font-weight:600">Useful shortcuts once Claude is open:</p>
 <div>
-<div class="kbrow"><span>Start a new conversation</span><span class="kbd">⌘+N</span></div>
-<div class="kbrow"><span>Switch between your code and Claude</span><span class="kbd">⌘+Esc</span></div>
-<div class="kbrow"><span>Open Extensions panel</span><span class="kbd">⌘+Shift+X</span></div>
-<div class="kbrow"><span>Open Command Palette</span><span class="kbd">⌘+Shift+P</span></div>
-<div class="kbrow"><span>New line without sending</span><span class="kbd">Shift+Enter</span></div>
+<div class="kbrow"><span>Start a new conversation</span><span class="kbd">Ctrl+N</span></div>
+<div class="kbrow"><span>Switch between your code and Claude</span><span class="kbd">Ctrl+Esc</span></div>
+<div class="kbrow"><span>Open Extensions panel</span><span class="kbd">Ctrl+Shift+X</span></div>
+<div class="kbrow"><span>Open Command Palette</span><span class="kbd">Ctrl+Shift+P</span></div>
 </div>
 <div class="callout tip" style="margin-top:.85rem"><strong>Talk to it naturally.</strong> Just type what you want like you'd ask a teammate: "What does this file do?" or "Help me understand this code." No special commands needed.</div>
-<div class="callout tip" style="margin-top:.5rem"><strong>Want to go deeper?</strong> Check out <strong>#guild-ai</strong> on Slack — people share tips, prompts, and use cases there every day.</div>
+<div class="bigbox warn" style="margin-top:.85rem"><strong>Reminder before Step 12:</strong> Make sure you've accepted your GitHub organization invite from IT — it comes as an email from GitHub saying you've been invited to join the aceable organization. You won't be able to clone the codebase without it.</div>
+`},
+{phase:"First steps",title:"Step 12 — Get access to Aceable's shared codebase",content:`
+<div class="bigbox warn"><strong>Before starting this step:</strong> You need to have accepted your GitHub organization invite from IT. It arrives as an email from GitHub saying you've been invited to join the aceable organization. Find that email and click Accept before continuing.</div>
+<div class="body">Now we'll pull down Aceable's shared codebase. This gives Claude access to real Aceable products so it can answer questions about how things actually work.</div>
+<ol class="steps">
+<li>Open VS Code and open the Claude Code panel (spark icon ✦ or Ctrl+Shift+P → Claude Code).</li>
+<li>In the Claude chat, paste this message and press Enter:</li>
+</ol>
+<div class="cb" id="c12"><span>Clone https://github.com/aceable/acewares.git — afterwards, start all new Claude sessions from that folder. Open the folder in VS Code so I can see the files.</span><button class="cpbtn" onclick="doCopy('c12',this)">Copy</button></div>
+<ol class="steps" style="counter-reset:s 2">
+<li>Claude will run the clone for you. If it asks for permission to run a command, click <strong>Allow</strong>.</li>
+<li>When it's done, you'll see the acewares folder appear in VS Code's file explorer panel on the left.</li>
+</ol>
+<div class="callout ok"><strong>Done when:</strong> The acewares folder is visible in VS Code and Claude can answer questions about it.</div>
 `},
 {phase:"Done!",title:"You're all set",done:true,content:`
 <div style="text-align:center;padding:1.25rem 0">
@@ -313,7 +270,7 @@ const ALL=[
 <h2 style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:.5rem">Setup complete</h2>
 <p style="font-size:14.5px;color:var(--text2);line-height:1.7;margin-bottom:1.1rem">Here's everything you've installed and configured:</p>
 <div class="cl">
-${["IT ticket submitted — Claude.ai access granted","GitHub account created with ace-firstname-lastinitial","Terminal opened and ready","Homebrew installed","nvm (Node Version Manager) installed","Node.js v24 installed","Claude Code CLI installed","Signed in to Claude with your Aceable account","VS Code installed","VS Code connected to Terminal","Claude Code extension installed in VS Code","GitHub CLI installed and authenticated","Aceable codebase cloned and ready"].map(i=>`<div class="ci"><span class="ck">✓</span><span>${i}</span></div>`).join('')}
+${["IT ticket submitted — Claude.ai access granted","GitHub account created with ace-firstname-lastinitial","Git for Windows installed","Claude Code installed (native or Ubuntu/WSL path)","Ubuntu configured as your Claude Code home (WSL users)","VS Code installed","Claude Code extension installed","Signed in with your Aceable account","Aceable codebase cloned and ready"].map(i=>`<div class="ci"><span class="ck">✓</span><span>${i}</span></div>`).join('')}
 </div>
 <p style="font-size:13px;color:var(--text3);margin-bottom:1.25rem">Stuck on anything? First ask Claude — if that doesn't resolve it, post in <strong style="color:var(--text2)">#guild-ai</strong> on Slack. The team is there to help.</p>
 <a class="lbtn" href="https://aceable.atlassian.net/wiki/spaces/DEV/pages/4534370305/Setup+AI+On+Your+Computer" target="_blank">Full Confluence guide →</a>
@@ -321,15 +278,17 @@ ${["IT ticket submitted — Claude.ai access granted","GitHub account created wi
 `}
 ];
 
+function getSteps(){return ALL.filter(s=>!(s.wslOnly&&path!=='wsl'));}
+function selFork(p){path=p;document.querySelectorAll('.fcard').forEach(c=>c.classList.remove('sel'));const el=document.getElementById('fc-'+p);if(el)el.classList.add('sel');const btn=document.getElementById('fnxt');if(btn)btn.disabled=false;}
 function doCopy(id,btn){const t=document.getElementById(id).querySelector('span').textContent;navigator.clipboard.writeText(t).then(()=>{btn.textContent='Copied!';btn.classList.add('copied');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('copied');},2000);});}
 
 function render(){
-  const s=ALL[cur],total=ALL.length-1;
-  document.getElementById('prog').innerHTML=ALL.map((_,i)=>`<div class="seg ${i<cur?'done':i===cur?'active':''}"></div>`).join('');
+  const steps=getSteps(),s=steps[cur],total=steps.length-1;
+  document.getElementById('prog').innerHTML=steps.map((_,i)=>`<div class="seg ${i<cur?'done':i===cur?'active':''}"></div>`).join('');
   document.getElementById('plbl').textContent=s.done?'Complete!':`Step ${cur} of ${total}`;
   const main=document.getElementById('main');
   if(s.done){main.innerHTML=`<div class="phase">${s.phase}</div><div class="stitle">${s.title}</div>${s.content}`;return;}
-  const isFirst=cur===0,isLast=cur===ALL.length-2;
+  const isFirst=cur===0,isLast=cur===steps.length-2;
   main.innerHTML=`
     <div class="phase">${s.phase}${!isFirst?' · Step '+cur+' of '+total:''}</div>
     <div class="stitle">${s.title}</div>
@@ -337,11 +296,13 @@ function render(){
     ${!isFirst ? HELP : ''}
     <div class="nav">
       ${!isFirst?`<button class="bbk" onclick="go(-1)">← Back</button>`:'<span></span>'}
-      <button class="bnx" onclick="go(1)">${isLast?'Finish ✓':'Next →'}</button>
+      ${s.fork?`<button class="bnx" id="fnxt" onclick="go(1)" disabled>Continue →</button>`:`<button class="bnx" onclick="go(1)">${isLast?'Finish ✓':'Next →'}</button>`}
     </div>`;
+  if(s.fork&&path){const el=document.getElementById('fc-'+path);if(el)el.classList.add('sel');const btn=document.getElementById('fnxt');if(btn)btn.disabled=false;}
+  if(s.title.includes('VS Code')&&!s.title.includes('extension')&&path==='wsl'){const el=document.getElementById('wslvs');if(el)el.innerHTML=`<div class="callout tip"><strong>WSL users — one extra step after VS Code installs:</strong><br>1. Press <strong>Ctrl+Shift+X</strong> to open Extensions and search for <strong>WSL</strong>. Install the <em>WSL</em> extension by Microsoft.<br>2. Press <strong>Ctrl+Shift+P</strong>, type <em>WSL: Connect to WSL</em>, and press Enter.<br>3. You'll know it worked when you see <strong>WSL: Ubuntu</strong> in green in the bottom-left corner of VS Code.</div>`;}
 }
 
-function go(dir){cur=Math.max(0,Math.min(ALL.length-1,cur+dir));render();window.scrollTo({top:0,behavior:'smooth'});}
+function go(dir){const steps=getSteps();cur=Math.max(0,Math.min(steps.length-1,cur+dir));render();window.scrollTo({top:0,behavior:'smooth'});}
 render();
 </script>
 </body>
