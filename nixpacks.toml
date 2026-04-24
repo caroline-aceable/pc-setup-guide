@@ -1,2 +1,2 @@
 [start]
-cmd = "sh -c 'npx serve . -l $PORT'"
+cmd = "node server.js"
