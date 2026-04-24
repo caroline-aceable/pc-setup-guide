@@ -1,2 +1,2 @@
 [start]
-cmd = "npm start"
+cmd = "sh -c 'npx serve . -l $PORT'"
